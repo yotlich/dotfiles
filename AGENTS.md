@@ -92,7 +92,7 @@ cat >"$cfg" <<EOF
 }
 EOF
 cspell --config "$cfg" --no-progress \
-    AGENTS.md README.md .local/bin/dotfiles '.config/**/*.json'
+    AGENTS.md README.md .local/bin/dotfiles '.config/**/*.json' .editorconfig
 rc=$?
 rm -f "$cfg"
 [ "$rc" -eq 0 ]
@@ -208,3 +208,9 @@ cp ~/.config/Code/recommended-extensions.json <project>/.vscode/extensions.json
 ```
 
 Почему так: команды и их версии — свойство репозитория (в нём есть `package.json`/`pom.xml`, версия тулинга берётся оттуда), а не машины. `editor.formatOnSave` имеет scope `LANGUAGE_OVERRIDABLE`, то есть задаётся проектом и языком, поэтому в глобальном `settings.json` его нет: там остаётся только то, что описывает машину и человека.
+
+### `.editorconfig`
+
+Глобальный файл, разъезжается как `~/.editorconfig`: кодировка, перевод строки, финальный перевод строки, обрезка хвостовых пробелов. Отступы здесь намеренно не задаются — они зависят от языка. `root = true` означает: для проекта без своего `.editorconfig` действуют эти правила, а не что-то найденное выше по дереву.
+
+Правила читает расширение `editorconfig.editorconfig`, и оно же применяет их к файлам, которые никакой форматер не трогает (`Makefile`, `*.sh`, `*.conf`, `*.toml`).
