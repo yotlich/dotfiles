@@ -1,0 +1,35 @@
+{
+  // Editor
+  "editor.fontFamily": "'Droid Sans Mono', monospace",
+  "editor.fontSize": 13,
+  "editor.fontLigatures": false,
+  "editor.minimap.enabled": false,
+
+  // Keyboard
+  "keyboard.dispatch": "keyCode",
+
+  // Workbench
+  "window.autoDetectColorScheme": true,
+  "explorer.compactFolders": false,
+  "explorer.excludeGitIgnore": false,
+  "extensions.ignoreRecommendations": true,
+  "chat.disableAIFeatures": true,
+
+  // Terminal
+  "terminal.integrated.sendKeybindingsToShell": false,
+  "terminal.integrated.allowChords": false,
+  "terminal.integrated.rightClickBehavior": "nothing",
+  "terminal.integrated.suggest.enabled": false,
+  "terminal.integrated.stickyScroll.enabled": false,
+
+  // Git
+  "git.autofetch": true,
+  "git.blame.editorDecoration.enabled": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+
+  // Debug
+  "debug.javascript.codelens.npmScripts": "never",
+
+  // Security
+  "security.workspace.trust.enabled": false
+}

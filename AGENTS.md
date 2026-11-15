@@ -41,6 +41,16 @@ prettier --parser markdown --prose-wrap never --trailing-comma none --check AGEN
 prettier --parser markdown --prose-wrap never --trailing-comma none --write AGENTS.md README.md
 markdownlint --disable MD013 -- AGENTS.md README.md
 
+# jsonc-vscode: запятая после последнего элемента недопустима
+prettier --parser jsonc --trailing-comma none --check \
+    .config/Code/User/settings.json \
+    .config/Code/User/keybindings.json \
+    .config/Code/recommended-extensions.json
+prettier --parser jsonc --trailing-comma none --write \
+    .config/Code/User/settings.json \
+    .config/Code/User/keybindings.json \
+    .config/Code/recommended-extensions.json
+
 # орфография: npm i -g cspell @cspell/dict-ru_ru, конфиг временный
 # в words только слова, которых нет в словаре: настоящая опечатка должна падать
 g=$(npm root -g)
@@ -51,13 +61,29 @@ cat >"$cfg" <<EOF
   "language": "ru,en",
   "import": ["$g/@cspell/dict-ru_ru/cspell-ext.json"],
   "words": [
+    "бандл",
+    "бандле",
+    "биндинг",
+    "биндинга",
     "бэкапов",
     "дотфайлы",
     "коммитом",
     "конфигами",
     "конфигов",
+    "промпте",
+    "резолвер",
+    "симлинк",
+    "симлинком",
+    "тулинга",
+    "форматтеров",
+    "шорткат",
     "autofetch",
+    "davidanson",
+    "dbaeumer",
     "esac",
+    "htmlhint",
+    "jkillian",
+    "Karabiner",
     "mktemp",
     "pipefail",
     "shellcheck",
@@ -66,10 +92,119 @@ cat >"$cfg" <<EOF
 }
 EOF
 cspell --config "$cfg" --no-progress \
-    AGENTS.md README.md .local/bin/dotfiles
+    AGENTS.md README.md .local/bin/dotfiles '.config/**/*.json'
 rc=$?
 rm -f "$cfg"
 [ "$rc" -eq 0 ]
 ```
 
 ## Инструменты
+
+### VS Code — настройки
+
+`settings.json` — только общее: редактор, клавиатура, рабочая область, терминал, git, отладка, доверие к рабочей папке. Здесь задаётся машинное и личное; настройки проекта и языка живут в `.vscode/` проекта. Исключение — настройки со scope `APPLICATION`: их иначе не сохранить (`keyboard.dispatch`).
+
+Разделы подписаны комментариями по области — английское слово с заглавной (`// Editor`, `// Keyboard`, `// Workbench`, `// Terminal`, `// Git`, `// Debug`, `// Security`). Это единственные комментарии в файле: пояснения к отдельному ключу живут в этом документе, а не в конфиге. Новая настройка идёт в раздел своей области, новый раздел заводится, только если такой области ещё нет.
+
+Scope не угадывается: он указан в документации настройки. Спорную настройку лучше не добавлять, чем положить в личный конфиг проектную.
+
+`terminal.integrated.scrollback` и `terminal.integrated.copyOnSelection` намеренно не заданы: историю и копирование отдаём терминалу, а не редактору, поэтому остаются дефолты VS Code.
+
+### VS Code — горячие клавиши
+
+`keybindings.json` пишется блоками, по одному на переопределённый шорткат:
+
+1. комментарий — название действия;
+2. снятие **всех дефолтных** клавиш этого действия (по строке на клавишу, объединение по Linux/Windows/macOS);
+3. снятие **всех дефолтных** действий на новой клавише;
+4. сам новый биндинг;
+5. пустая строка.
+
+Если снимать нечего (у команды нет дефолтных клавиш, на новой клавише нет дефолтных действий), шаги 2–3 пропускаются, и блок состоит из комментария и одного биндинга — так и пишется в комментарии, чтобы это не выглядело недоделкой.
+
+Снятия пишутся как `"command": "-<id>"` **без `when`**: резолвер (`keybindingResolver._isTargetedForRemoval`) при пустом `when` снимает дефолт на этой клавише в любом контексте, а при заданном — только если `when` покрывает условие дефолта, иначе снятие молча не срабатывает.
+
+#### Откуда берутся дефолты
+
+GUI-пункт «Preferences: Open Default Keyboard Shortcuts (JSON)» без GUI недоступен, поэтому источник — собранный бандл установленного редактора: `/usr/share/code/resources/app/out/vs/workbench/workbench.desktop.main.js`. Клавиши в нём записаны числами `KeyCode | KeyMod`: `ctrl` 2048, `shift` 1024, `alt` 512, `win` 256. Код буквы — `31 + позиция в алфавите от нуля` (`KeyA` 31, `KeyM` 43, `KeyD` 34), код F-клавиши — `58 + номер` (`F1` 59, `F12` 70). То есть `ctrl+alt+m` — это `2048 + 512 + 43 = 2603`, а `ctrl+shift+d` — `2048 + 1024 + 34 = 3106`.
+
+Числа смотрят рядом с id команды, а не по всему файлу: в бандле хватает случайных совпадений. У одной команды это `primary:<N>`, у другой — объект `keybinding:{...primary:<N>, secondary:[...]}`, а `primary` бывает условным (`primary:lp?void 0:3118` — везде, кроме macOS). Отсюда проверка: найти id, посмотреть, есть ли при нём `primary`, и сравнить число со своей клавишей; команда без `primary` дефолтной клавиши не имеет, а отсутствующий id означает, что команды нет вообще.
+
+#### Принцип: клавиша принадлежит поверхности
+
+Клавиша работает **глобально** — контекст не используется для того, чтобы «включить шорткат только в удобном месте». `when` допустим в трёх случаях:
+
+- **Предохранитель.** У действия есть поверхность, без которой оно делает не то: `workbench.action.terminal.paste` / `copyAndClearSelection` без `terminalFocus` вставили бы в последний активный терминал, пока ты печатаешь в редакторе. Поэтому у них `"when": "terminalFocus"`.
+- **Разделение владения.** Одна и та же клавиша по-разному осмысленна на разных поверхностях. `alt+left`/`alt+right` — навигация по истории редактора вне терминала (`"when": "!terminalFocus"`), а внутри терминала они не являются действием VS Code: сняты и `sendSequence` (эмуляция `ctrl+←/→`), и переключение панелей, поэтому клавиша уходит в xterm как есть — `\e[1;3D` / `\e[1;3C`. Проверка: в `cat` видно `^[[1;3D`, и это доказывает, что байт не перехвачен (`sendSequence` отправил бы `1;5` — ctrl, а не alt); word-navigation в промпте после этого делает сам readline, и делает.
+- **Зеркало `precondition`.** Условие повторяет то, что команда требует и так: `editor.action.formatDocument` на `ctrl+e` стоит под `editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly && !inCompositeEditor`, поэтому без провайдера форматирования `ctrl+e` остаётся свободной. Это не «включить шорткат где удобно», а та же обязательная проверка команды.
+
+Чего принцип **не** даёт: глобальность не отменяет `precondition` самой команды (`navigateBack` без истории, `formatDocument` без провайдера форматирования) — клавиша твоя, действие просто неприменимо.
+
+Ограничение: клавиши с `cmd`/`super` на macOS этим не снимаются — снятие `ctrl+…` не влияет на `cmd+…`, поэтому на macOS дефолтные `⌘C`/`⌘V` остаются рядом с переопределёнными. По той же причине конфиг рассчитан на Linux и Windows: на macOS глобальный `alt+left/right` перебивает `Option+←/→` (движение по словам). На macOS это решается не в `keybindings.json`, а системно — переназначением модификаторов (или Karabiner), чтобы клавиши были одинаковыми во всех приложениях, а не только в редакторе.
+
+### VS Code — расширения
+
+Ставятся не всем списком сразу: в проект кладётся `.vscode/extensions.json`, и редактор сам предлагает поставить то, что нужно для этой работы.
+
+Шаблон живёт в `~/.config/Code/recommended-extensions.json`. В проект он подключается симлинком (правка шаблона действует везде) или копией:
+
+```bash
+# симлинк: один источник правды
+mkdir -p <project>/.vscode
+ln -sfn ~/.config/Code/recommended-extensions.json <project>/.vscode/extensions.json
+
+# копия: если проекту нужен свой набор
+mkdir -p <project>/.vscode
+cp ~/.config/Code/recommended-extensions.json <project>/.vscode/extensions.json
+```
+
+Содержимое шаблона:
+
+```json
+{
+  "recommendations": ["<publisher>.<extension>"],
+  "unwantedRecommendations": []
+}
+```
+
+`unwantedRecommendations` — чтобы отсечь навязчивые «а поставьте ещё это» от самого редактора или чужих `.vscode`.
+
+В шаблоне только то, без чего проект не читается и не форматируется:
+
+- `editorconfig.editorconfig` — применяет правила `.editorconfig`;
+- `jkillian.custom-local-formatters` — локальные команды форматирования;
+- `davidanson.vscode-markdownlint` — разметка документации;
+- `streetsidesoftware.code-spell-checker` (+ `-russian`) — орфография.
+
+Расширения под стек — `dbaeumer.vscode-eslint`, `stylelint.vscode-stylelint`, `htmlhint.vscode-htmlhint`, языковые паки — в `.vscode/extensions.json` конкретного проекта, здесь им не место. Личный инструментарий (git-граф, файловые операции, темы иконок) в рекомендации не попадает: он ставится один раз себе, а не предлагается каждому, кто откроет репозиторий.
+
+Почему не `~/.vscode/extensions.json`: этот файл читается только из `.vscode/` рабочей папки, а путь `~/.vscode` в этом репозитории — служебный каталог самого VS Code, туда рекомендации не кладутся.
+
+Уведомления о рекомендациях погашены глобально: `extensions.ignoreRecommendations` в `settings.json` включён. Редактор не всплывает с «поставьте расширение», а список остаётся во вкладке Recommended панели расширений. Это не отменяет шаблон, но и не делает его навязчивым.
+
+### VS Code — форматирование
+
+Форматирование делится на два уровня, и расширений-форматтеров на каждый язык не ставится ни на одном из них.
+
+**Глобальный уровень — `.editorconfig`** (раздел ниже): то, что одинаково во всех проектах.
+
+**Локальный уровень — команды проекта.** `jkillian.custom-local-formatters` вызывает локальные команды, а список команд задаётся в `.vscode/settings.json` самого проекта:
+
+```jsonc
+{
+  "editor.defaultFormatter": "jkillian.custom-local-formatters",
+  "editor.formatOnSave": true,
+  "customLocalFormatters.formatters": [
+    {
+      "command": "prettier --stdin-filepath=${file}",
+      "languages": ["json", "jsonc", "javascript", "typescript", "markdown"]
+    },
+    {
+      "command": "google-java-format -",
+      "languages": ["java"]
+    }
+  ]
+}
+```
+
+Почему так: команды и их версии — свойство репозитория (в нём есть `package.json`/`pom.xml`, версия тулинга берётся оттуда), а не машины. `editor.formatOnSave` имеет scope `LANGUAGE_OVERRIDABLE`, то есть задаётся проектом и языком, поэтому в глобальном `settings.json` его нет: там остаётся только то, что описывает машину и человека.

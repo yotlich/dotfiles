@@ -1,0 +1,233 @@
+[
+  // Toggle terminal (F4). Defaults: ctrl+` (win/mac/linux).
+  {
+    "key": "ctrl+`",
+    "command": "-workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "ctrl+`",
+    "command": "-workbench.action.chatWindow.toggleTerminal"
+  },
+  // Paired keys of the removed navigation: Shift+F4 gives nothing, references stay on F12/Shift+F12.
+  {
+    "key": "shift+f4",
+    "command": "-goToPreviousReference"
+  },
+  {
+    "key": "shift+f4",
+    "command": "-search.action.focusPreviousSearchResult"
+  },
+  {
+    "key": "shift+f4",
+    "command": "-references-view.prev"
+  },
+  {
+    "key": "f4",
+    "command": "-goToNextReference"
+  },
+  {
+    "key": "f4",
+    "command": "-search.action.focusNextSearchResult"
+  },
+  {
+    "key": "f4",
+    "command": "-references-view.next"
+  },
+  {
+    "key": "f4",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+
+  // Format document (ctrl+e). Defaults: shift+alt+f (win/mac), ctrl+shift+i (linux).
+  {
+    "key": "shift+alt+f",
+    "command": "-editor.action.formatDocument"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "-editor.action.formatDocument"
+  },
+  {
+    "key": "shift+alt+f",
+    "command": "-editor.action.formatDocument.none"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "-editor.action.formatDocument.none"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-workbench.action.quickOpen"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-workbench.action.quickOpenNavigateNextInFilePicker"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-editor.action.toggleScreenReaderAccessibilityMode"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-markdown.editor.cursorLogicalLineEnd"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "-cursorLineEnd"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "editor.action.formatDocument",
+    "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly && !inCompositeEditor"
+  },
+
+  // Terminal copy (ctrl+shift+c). Defaults: ctrl+c (win).
+  {
+    "key": "ctrl+c",
+    "command": "-workbench.action.terminal.copyAndClearSelection"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "-workbench.action.terminal.copySelection"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "-workbench.action.terminal.openNativeConsole"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "-aiCustomization.focusView"
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.terminal.copyAndClearSelection",
+    "when": "terminalFocus"
+  },
+
+  // Terminal paste (ctrl+shift+v). Defaults: ctrl+v (win), ctrl+shift+v (linux).
+  {
+    "key": "ctrl+v",
+    "command": "-workbench.action.terminal.paste"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "-workbench.action.terminal.paste"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "-editor.action.pasteAsText"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "-markdown.togglePreview"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "-notebook.cell.pasteAbove"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "workbench.action.terminal.paste",
+    "when": "terminalFocus"
+  },
+
+  // Navigate back (alt+left). Defaults: alt+left (win), ctrl+- (mac), ctrl+alt+- (linux).
+  // In the terminal alt+left is not a VS Code action: it goes to the shell as a raw escape sequence.
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.navigateBack"
+  },
+  {
+    "key": "ctrl+-",
+    "command": "-workbench.action.navigateBack"
+  },
+  {
+    "key": "ctrl+alt+-",
+    "command": "-workbench.action.navigateBack"
+  },
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.quickInputBack"
+  },
+  {
+    "key": "alt+left",
+    "command": "-cursorWordLeft"
+  },
+  {
+    "key": "alt+left",
+    "command": "-breadcrumbs.focusPrevious"
+  },
+  {
+    "key": "alt+left",
+    "command": "-breadcrumbs.focusPreviousWithPicker"
+  },
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.terminal.focusPreviousPane"
+  },
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.terminal.sendSequence"
+  },
+  {
+    "key": "alt+left",
+    "command": "-sessions.goBack"
+  },
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.agentsWindowExtensions.backToList"
+  },
+  {
+    "key": "alt+left",
+    "command": "-workbench.action.browser.goBack"
+  },
+  {
+    "key": "alt+left",
+    "command": "workbench.action.navigateBack",
+    "when": "!terminalFocus"
+  },
+
+  // Navigate forward (alt+right). Defaults: alt+right (win), ctrl+shift+- (mac/linux).
+  // In the terminal alt+right is not a VS Code action: it goes to the shell as a raw escape sequence.
+  {
+    "key": "alt+right",
+    "command": "-workbench.action.navigateForward"
+  },
+  {
+    "key": "ctrl+shift+-",
+    "command": "-workbench.action.navigateForward"
+  },
+  {
+    "key": "alt+right",
+    "command": "-cursorWordEndRight"
+  },
+  {
+    "key": "alt+right",
+    "command": "-breadcrumbs.focusNext"
+  },
+  {
+    "key": "alt+right",
+    "command": "-breadcrumbs.focusNextWithPicker"
+  },
+  {
+    "key": "alt+right",
+    "command": "-workbench.action.terminal.focusNextPane"
+  },
+  {
+    "key": "alt+right",
+    "command": "-workbench.action.terminal.sendSequence"
+  },
+  {
+    "key": "alt+right",
+    "command": "-sessions.goForward"
+  },
+  {
+    "key": "alt+right",
+    "command": "-workbench.action.browser.goForward"
+  },
+  {
+    "key": "alt+right",
+    "command": "workbench.action.navigateForward",
+    "when": "!terminalFocus"
+  }
+]
