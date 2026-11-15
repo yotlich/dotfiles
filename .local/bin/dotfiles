@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# dotfiles - thin git wrapper for a bare dotfiles repository.
+#
+#   dotfiles                 # short status (tracked files only)
+#   dotfiles add .config/Code/User/settings.json
+#   dotfiles commit -m 'vscode: ...'
+#   dotfiles diff / log / show ...
+#
+# Anything else is passed to git as is: dotfiles <git-args>.
+# Works without this wrapper too:
+#   git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" <args>
+
+set -euo pipefail
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
+WORK_TREE="${WORK_TREE:-$HOME}"
+
+if [ ! -d "$DOTFILES_DIR" ]; then
+    printf 'dotfiles: no such repository: %s\n' "$DOTFILES_DIR" >&2
+    printf 'dotfiles: clone it first: git clone --bare <url> %s\n' "$DOTFILES_DIR" >&2
+    exit 1
+fi
+
+if [ ! -d "$WORK_TREE" ]; then
+    printf 'dotfiles: no such work tree: %s\n' "$WORK_TREE" >&2
+    exit 1
+fi
+
+git_args=(--git-dir="$DOTFILES_DIR" --work-tree="$WORK_TREE")
+
+case "${1:-}" in
+-h | --help | help)
+    sed -n '2,11p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+'')
+    exec git "${git_args[@]}" status --short --branch
+    ;;
+esac
+
+exec git "${git_args[@]}" "$@"
